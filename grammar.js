@@ -10,13 +10,44 @@ export default grammar({
   name: "diff",
 
   extras: ($) => [WHITE_SPACE],
+  conflicts: ($) => [[$._file_hunk, $._line], [$._standalone_hunk, $._line]],
 
   rules: {
     source: ($) =>
       seq(
-        repeat(choice($.block, seq(optional($._line), NEWLINE))),
+        repeat(
+          choice(
+            $.block,
+            $._file_hunk,
+            $._standalone_hunk,
+            seq(optional($._line), NEWLINE)
+          )
+        ),
         optional($._line)
       ),
+
+    _file_hunk: ($) =>
+      seq(
+        $.old_file,
+        NEWLINE,
+        $.new_file,
+        NEWLINE,
+        prec.right(
+          repeat1(
+            seq(
+              choice(
+                $.location,
+                $.context,
+                alias($._hunk_line_deletion, $.deletion),
+                alias($._hunk_line_addition, $.addition)
+              ),
+              NEWLINE
+            )
+          )
+        )
+      ),
+
+    _standalone_hunk: ($) => seq($.location, NEWLINE, $._changes_without_location),
 
     _line: ($) =>
       choice(
@@ -56,7 +87,13 @@ export default grammar({
           ),
           optional(
             choice(
-              seq($.old_file, NEWLINE, $.new_file, NEWLINE, $.hunks),
+              seq(
+                $.old_file,
+                NEWLINE,
+                $.new_file,
+                NEWLINE,
+                optional(choice($.hunks, $._changes_without_location))
+              ),
               $.binary_patch
             )
           )
@@ -103,6 +140,7 @@ export default grammar({
         repeat1(
           seq(
             choice(
+              alias($._hunk_line_deletion, $.deletion),
               alias($._hunk_addition, $.addition),
               alias($._hunk_deletion, $.deletion),
               $.addition,
@@ -111,6 +149,20 @@ export default grammar({
               $.context,
               $.special,
               $.unrecognized
+            ),
+            prec.right(repeat1(NEWLINE))
+          )
+        )
+      ),
+
+    _changes_without_location: ($) =>
+      prec.right(
+        repeat1(
+          seq(
+            choice(
+              $.context,
+              alias($._hunk_line_deletion, $.deletion),
+              alias($._hunk_line_addition, $.addition)
             ),
             prec.right(repeat1(NEWLINE))
           )
@@ -143,6 +195,8 @@ export default grammar({
 
     _hunk_addition: ($) => iseq("+++", ANYTHING),
     _hunk_deletion: ($) => iseq("---", ANYTHING),
+    _hunk_line_addition: ($) => iseq("+", optional(ANYTHING)),
+    _hunk_line_deletion: ($) => iseq("-", optional(ANYTHING)),
 
     addition: ($) =>
       choice(
@@ -154,7 +208,6 @@ export default grammar({
       ),
     deletion: ($) =>
       choice(
-        iseq("-", optional(ANYTHING)),
         iseq("--", optional(ANYTHING)),
         iseq("---"),
         iseq("----", optional(ANYTHING)),

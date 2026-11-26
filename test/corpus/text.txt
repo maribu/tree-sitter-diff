@@ -714,3 +714,147 @@ Comments
   (comment)
   (comment)
   (context))
+
+================================================================================
+List in preamble is unrecognized, not deletion
+================================================================================
+List of changes
+- first change
+- second change
+- third change
+--- a/foo.txt
++++ b/foo.txt
+@@ -1,3 +1,3 @@
+ Common text
+- old
++ new
+ More common text
+Another preamble with a list:
+- first
+- second
+--- a/bar.txt
++++ b/bar.txt
+ Common text
+- old
++ new
+ More common text
+
+--------------------------------------------------------------------------------
+
+(source
+  (unrecognized)
+  (unrecognized)
+  (unrecognized)
+  (unrecognized)
+  (old_file
+    (filename))
+  (new_file
+    (filename))
+  (location
+    (linerange)
+    (linerange))
+  (context)
+  (deletion)
+  (addition)
+  (context)
+  (unrecognized)
+  (unrecognized)
+  (unrecognized)
+  (old_file
+    (filename))
+  (new_file
+    (filename))
+  (context)
+  (deletion)
+  (addition)
+  (context))
+
+================================================================================
+No-location changes followed by new-before-old file headers
+================================================================================
+diff --color -rupN a/foo.txt b/foo.txt
+--- a/foo.txt	2026-11-26 12:26:22.471943420 +0100
++++ b/foo.txt	2026-11-26 12:26:32.080862772 +0100
+ Common text
+-old
++new
+ More common text
++++ b/foo.txt	2026-11-26 12:26:32.080862772 +0100
+--- a/foo.txt	2026-11-26 12:26:22.471943420 +0100
+@@ -12,2 +12,2 @@
+ Common text
+-old asdf
++new asdf
+ More common text
+
+--------------------------------------------------------------------------------
+
+(source
+  (block
+    (command
+      (argument)
+      (filename))
+    (old_file
+      (filename))
+    (new_file
+      (filename))
+    (context)
+    (deletion)
+    (addition)
+    (context))
+  (new_file
+    (filename))
+  (old_file
+    (filename))
+  (location
+    (linerange)
+    (linerange))
+  (context)
+  (deletion)
+  (addition)
+  (context))
+
+================================================================================
+Missing first location header before line-based changes
+================================================================================
+diff --color -rupN a/foo.txt b/foo.txt
+--- a/foo.txt	2026-11-26 12:26:22.471943420 +0100
++++ b/foo.txt	2026-11-26 12:26:32.080862772 +0100
+ Common text
+-old
++new
+ More common text
+--- a/foo.txt	2026-11-26 12:26:22.471943420 +0100
++++ b/foo.txt	2026-11-26 12:26:32.080862772 +0100
+@@ -12,2 +12,2 @@
+ Common text
+-old asdf
++new asdf
+ More common text
+
+--------------------------------------------------------------------------------
+
+(source
+  (block
+    (command
+      (argument)
+      (filename))
+    (old_file
+      (filename))
+    (new_file
+      (filename))
+    (context)
+    (deletion)
+    (addition)
+    (context))
+  (old_file
+    (filename))
+  (new_file
+    (filename))
+  (location
+    (linerange)
+    (linerange))
+  (context)
+  (deletion)
+  (addition)
+  (context))
