@@ -15,6 +15,14 @@
                 "name": "block"
               },
               {
+                "type": "SYMBOL",
+                "name": "_file_hunk"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_standalone_hunk"
+              },
+              {
                 "type": "SEQ",
                 "members": [
                   {
@@ -49,6 +57,91 @@
               "type": "BLANK"
             }
           ]
+        }
+      ]
+    },
+    "_file_hunk": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "old_file"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\r?\\n"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "new_file"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\r?\\n"
+        },
+        {
+          "type": "PREC_RIGHT",
+          "value": 0,
+          "content": {
+            "type": "REPEAT1",
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "location"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "context"
+                    },
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_hunk_line_deletion"
+                      },
+                      "named": true,
+                      "value": "deletion"
+                    },
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_hunk_line_addition"
+                      },
+                      "named": true,
+                      "value": "addition"
+                    }
+                  ]
+                },
+                {
+                  "type": "PATTERN",
+                  "value": "\\r?\\n"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "_standalone_hunk": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "location"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\r?\\n"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_changes_without_location"
         }
       ]
     },
@@ -194,8 +287,25 @@
                         "value": "\\r?\\n"
                       },
                       {
-                        "type": "SYMBOL",
-                        "name": "hunks"
+                        "type": "CHOICE",
+                        "members": [
+                          {
+                            "type": "CHOICE",
+                            "members": [
+                              {
+                                "type": "SYMBOL",
+                                "name": "hunks"
+                              },
+                              {
+                                "type": "SYMBOL",
+                                "name": "_changes_without_location"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "BLANK"
+                          }
+                        ]
                       }
                     ]
                   },
@@ -400,6 +510,15 @@
                   "type": "ALIAS",
                   "content": {
                     "type": "SYMBOL",
+                    "name": "_hunk_line_deletion"
+                  },
+                  "named": true,
+                  "value": "deletion"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
                     "name": "_hunk_addition"
                   },
                   "named": true,
@@ -437,6 +556,56 @@
                 {
                   "type": "SYMBOL",
                   "name": "unrecognized"
+                }
+              ]
+            },
+            {
+              "type": "PREC_RIGHT",
+              "value": 0,
+              "content": {
+                "type": "REPEAT1",
+                "content": {
+                  "type": "PATTERN",
+                  "value": "\\r?\\n"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "_changes_without_location": {
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "REPEAT1",
+        "content": {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "context"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_hunk_line_deletion"
+                  },
+                  "named": true,
+                  "value": "deletion"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_hunk_line_addition"
+                  },
+                  "named": true,
+                  "value": "addition"
                 }
               ]
             },
@@ -802,6 +971,54 @@
         }
       ]
     },
+    "_hunk_line_addition": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "IMMEDIATE_TOKEN",
+          "content": {
+            "type": "STRING",
+            "value": "+"
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[^\\r\\n]+"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "_hunk_line_deletion": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "IMMEDIATE_TOKEN",
+          "content": {
+            "type": "STRING",
+            "value": "-"
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[^\\r\\n]+"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
     "addition": {
       "type": "CHOICE",
       "members": [
@@ -918,30 +1135,6 @@
     "deletion": {
       "type": "CHOICE",
       "members": [
-        {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "IMMEDIATE_TOKEN",
-              "content": {
-                "type": "STRING",
-                "value": "-"
-              }
-            },
-            {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "PATTERN",
-                  "value": "[^\\r\\n]+"
-                },
-                {
-                  "type": "BLANK"
-                }
-              ]
-            }
-          ]
-        },
         {
           "type": "SEQ",
           "members": [
@@ -1161,7 +1354,16 @@
       "value": "[\\t\\f\\v ]+"
     }
   ],
-  "conflicts": [],
+  "conflicts": [
+    [
+      "_file_hunk",
+      "_line"
+    ],
+    [
+      "_standalone_hunk",
+      "_line"
+    ]
+  ],
   "precedences": [],
   "externals": [],
   "inline": [],
